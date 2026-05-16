@@ -54,7 +54,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1 flex justify-between">
-                            <span>Light Intensity ($G$)</span>
+                            <span>Light Intensity (G) </span>
                             <span id="val-intensity" class="text-amber-400 font-mono">1000 W/m²</span>
                         </label>
                         <input type="range" id="input-intensity" min="200" max="1200" step="50" value="1000" oninput="calculateCharacteristics()" class="w-full accent-amber-500 bg-gray-700 h-2 rounded-lg appearance-none cursor-pointer">
@@ -62,7 +62,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1 flex justify-between">
-                            <span>Cell Temperature ($T$)</span>
+                            <span>Cell Temperature (T) </span>
                             <span id="val-temp" class="text-amber-400 font-mono">25 °C</span>
                         </label>
                         <input type="range" id="input-temp" min="0" max="75" step="5" value="25" oninput="calculateCharacteristics()" class="w-full accent-amber-500 bg-gray-700 h-2 rounded-lg appearance-none cursor-pointer">
@@ -80,7 +80,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1 flex justify-between">
-                            <span>Load Resistance ($R_L$)</span>
+                            <span>Load Resistance sis, (R<sub>L</sub>)</span>
                             <span id="val-rh" class="text-amber-400 font-mono">10.0 Ω</span>
                         </label>
                         <input type="range" id="input-rh" min="0.1" max="150" step="0.5" value="10" oninput="updateCurrentPoint()" class="w-full accent-emerald-500 bg-gray-700 h-2 rounded-lg appearance-none cursor-pointer">
@@ -110,15 +110,15 @@
             <!-- Live Physics Analytics Dashboard Card -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md">
-                    <div class="text-xs text-gray-400 font-medium">Open Circuit Volts ($V_{oc}$)</div>
+                    <div class="text-xs text-gray-400 font-medium">Open Circuit Volts (V<sub>oc</sub>)</div>
                     <div id="calc-voc" class="text-lg font-mono font-bold text-amber-400 mt-1">--</div>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md">
-                    <div class="text-xs text-gray-400 font-medium">Short Circuit Amps ($I_{sc}$)</div>
+                    <div class="text-xs text-gray-400 font-medium">Short Circuit Amps (I<sub>ss</sub>sub>)</div>
                     <div id="calc-isc" class="text-lg font-mono font-bold text-amber-400 mt-1">--</div>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md">
-                    <div class="text-xs text-gray-400 font-medium">Max Available Power ($P_{max}$)</div>
+                    <div class="text-xs text-gray-400 font-medium">Max Available Power (P<sub>max</sub>)</div>
                     <div id="calc-pmax" class="text-lg font-mono font-bold text-emerald-400 mt-1">--</div>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md bg-gradient-to-br from-gray-800 to-gray-850">
@@ -155,10 +155,10 @@
                             <tr>
                                 <th class="px-4 py-3">Obs. No.</th>
                                 <th class="px-4 py-3">Config</th>
-                                <th class="px-4 py-3">Light ($W/m^2$)</th>
-                                <th class="px-4 py-3">Voltage ($V$)</th>
-                                <th class="px-4 py-3">Current ($A$)</th>
-                                <th class="px-4 py-3">Power ($W$)</th>
+                                <th class="px-4 py-3">Light (W/m<sup>2</sup>)</th>
+                                <th class="px-4 py-3">Voltage (V)</th>
+                                <th class="px-4 py-3">Current (A)</th>
+                                <th class="px-4 py-3">Power (W)</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="divide-y divide-gray-700">
