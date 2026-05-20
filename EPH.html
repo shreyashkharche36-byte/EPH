@@ -27,7 +27,7 @@
                     <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                         Solar Cell Characteristics Engine
                     </h1>
-                    <p class="text-xs text-slate-400 font-medium">Engineering Physics Advanced Virtual Lab (A9 & B7 Integration)</p>
+                    <p class="text-xs text-slate-400 font-medium">Engineering Physics Advanced Virtual Lab</p>
                 </div>
             </div>
             
@@ -87,12 +87,12 @@
                         <div class="bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center gap-2">
                             <div id="solar-panel-asset" draggable="true" ondragstart="drag(event)" 
                                  class="w-full bg-gradient-to-br from-blue-900 to-indigo-950 p-2.5 rounded-xl border-2 border-blue-500 shadow-md cursor-grab active:cursor-grabbing hover:scale-[1.01] transition-all flex flex-col items-center group">
-                                <img src="solar-cell-image.jpg" alt="Solar Cell" class="w-full h-14 object-cover rounded border border-blue-500/40 shadow-inner">
+                                <img src="Screenshot 2026-05-20 144549.png" alt="Solar Cell" class="w-full h-14 object-cover rounded border border-blue-500/40 shadow-inner">
                                 <span class="text-[10px] font-bold text-blue-300 mt-1.5 tracking-wide flex items-center gap-1">
                                     <i class="fa-solid fa-hand-rock text-slate-400 group-hover:text-amber-400 text-[9px]"></i>
                                     DRAG PHOTOVOLTAIC NODE
                                 </span>
-                                <span class="text-[9px] text-slate-500 font-mono">V_oc: 0.60V | I_sc: 3.0A</span>
+                                <span class="text-[9px] text-slate-500 font-mono">V<sub>oc</sub>: 0.60V | I<sub>sc</sub>: 3.0A</span>
                             </div>
                         </div>
                     </div>
@@ -108,7 +108,7 @@
                 <div class="space-y-4">
                     <div>
                         <div class="flex justify-between text-xs font-medium mb-1.5">
-                            <span class="text-slate-400">Load Resistance ($R_L$)</span>
+                            <span class="text-slate-400">Load Resistance R<sub>L</sub></span>
                             <span id="val-rh" class="text-emerald-400 font-bold font-mono">10.0 Ω</span>
                         </div>
                         <div class="flex items-center gap-3">
@@ -141,26 +141,26 @@
                 </h2>
                 <div class="grid grid-cols-2 gap-3 font-mono">
                     <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
-                        <span class="text-[10px] font-sans text-slate-400 block">Open Circuit Volts ($V_{oc}$)</span>
+                        <span class="text-[10px] font-sans text-slate-400 block">Open Circuit Volts V<sub>oc</sub></span>
                         <span class="text-base font-bold text-cyan-400 block mt-0.5" id="calc-voc">--</span>
                     </div>
                     <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
-                        <span class="text-[10px] font-sans text-slate-400 block">Short Circuit Amps ($I_{sc}$)</span>
+                        <span class="text-[10px] font-sans text-slate-400 block">Short Circuit Amps I<sub>sc</sub></span>
                         <span class="text-base font-bold text-amber-400 block mt-0.5" id="calc-isc">--</span>
                     </div>
                     <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
-                        <span class="text-[10px] font-sans text-slate-400 block">Max Output Power ($P_{max}$)</span>
+                        <span class="text-[10px] font-sans text-slate-400 block">Max Output Power P<sub>max</sub></span>
                         <span class="text-base font-bold text-emerald-400 block mt-0.5" id="calc-pmax">--</span>
                     </div>
                     <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
-                        <span class="text-[10px] font-sans text-slate-400 block">Calculated Fill Factor ($FF$)</span>
+                        <span class="text-[10px] font-sans text-slate-400 block">Calculated Fill Factor FF</span>
                         <span class="text-base font-bold text-indigo-400 block mt-0.5" id="calc-ff">--</span>
                     </div>
                 </div>
                 
                 <div class="mt-3 bg-slate-900/60 border border-slate-850 p-2.5 rounded-xl text-[11px] text-slate-400 space-y-1">
-                    <div class="flex justify-between"><span class="font-medium">Voltage at Max Power ($V_{mp}$):</span><span id="m-vmp" class="font-mono text-slate-300">--</span></div>
-                    <div class="flex justify-between"><span class="font-medium">Current at Max Power ($I_{mp}$):</span><span id="m-imp" class="font-mono text-slate-300">--</span></div>
+                    <div class="flex justify-between"><span class="font-medium">Voltage at Max Power V<sub>mp</sub>):</span><span id="m-vmp" class="font-mono text-slate-300">--</span></div>
+                    <div class="flex justify-between"><span class="font-medium">Current at Max Power I<sub>mp</sub>:</span><span id="m-imp" class="font-mono text-slate-300">--</span></div>
                 </div>
 
                 <button onclick="resetSimulation()" class="w-full mt-3 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 py-1.5 rounded-lg text-[10px] font-semibold border border-slate-800 transition flex items-center justify-center gap-1.5 cursor-pointer">
@@ -193,7 +193,7 @@
                                 <div class="text-center text-slate-500 text-xs py-4 italic pointer-events-none">Drop photovoltaic blocks to scale array Voltage</div>
                             </div>
                             <div class="text-[10px] text-slate-500 flex justify-between items-center">
-                                <span>Model: $V_{total} = \Sigma V_n \ | \ I_{total} = I_{cell}$</span>
+                                <span>Model: V<sub>total</sub> = &Sigma; V<sub>n</sub>\I<sub>total</sub> = I<sub>cell</sub></span>
                                 <button onclick="clearZone('series')" class="text-red-400 hover:text-red-300 font-medium underline text-[9px] cursor-pointer">Clear Slot</button>
                             </div>
                         </div>
@@ -208,7 +208,7 @@
                                 <div class="text-center text-slate-500 text-xs py-4 italic pointer-events-none">Drop photovoltaic blocks to scale array Current</div>
                             </div>
                             <div class="text-[10px] text-slate-500 flex justify-between items-center">
-                                <span>Model: $V_{total} = V_{cell} \ | \ I_{total} = \Sigma I_n$</span>
+                                <span>Model: V<sub>total</sub> = V<sub>cell</sub>\I<sub>total</sub> = &Sigma; I<sub>n</sub></span>
                                 <button onclick="clearZone('parallel')" class="text-red-400 hover:text-red-300 font-medium underline text-[9px] cursor-pointer">Clear Slot</button>
                             </div>
                         </div>
