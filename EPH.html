@@ -20,9 +20,9 @@
     <header class="border-b border-slate-800 bg-slate-950 p-4 sticky top-0 z-50 shadow-2xl">
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-amber-500 text-slate-950 p-2.5 rounded-xl shadow-lg shadow-amber-500/20 animate-pulse">
-                    <i class="fa-solid fa-solar-panel text-2xl"></i>
-                </div>
+                <div class="flex items-center justify-center">
+    <img src="https://www.pccoepune.com/images/pccoe-logo-new.webp" alt="PCCOE, Pune" class="h-12 w-auto object-contain">
+</div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                         Solar Cell Characteristics Engine
@@ -87,13 +87,7 @@
                         <div class="bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center gap-2">
                             <div id="solar-panel-asset" draggable="true" ondragstart="drag(event)" 
                                  class="w-full bg-gradient-to-br from-blue-900 to-indigo-950 p-2.5 rounded-xl border-2 border-blue-500 shadow-md cursor-grab active:cursor-grabbing hover:scale-[1.01] transition-all flex flex-col items-center group">
-                                <div class="w-full h-12 bg-blue-950 rounded border border-blue-400/20 solar-grid relative flex flex-wrap p-1 gap-1">
-                                    <div class="absolute inset-0 bg-cyan-400/5 mix-blend-color-dodge rounded"></div>
-                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
-                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
-                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
-                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
-                                </div>
+                                <img src="solar-cell-image.jpg" alt="Solar Cell" class="w-full h-14 object-cover rounded border border-blue-500/40 shadow-inner">
                                 <span class="text-[10px] font-bold text-blue-300 mt-1.5 tracking-wide flex items-center gap-1">
                                     <i class="fa-solid fa-hand-rock text-slate-400 group-hover:text-amber-400 text-[9px]"></i>
                                     DRAG PHOTOVOLTAIC NODE
@@ -459,11 +453,23 @@
         }
 
         function createPanelDOMNode(label, isMini = false) {
-            const div = document.createElement('div');
-            div.className = `${isMini ? 'w-24 h-7' : 'w-20 h-12'} bg-gradient-to-br from-blue-950 to-indigo-950 rounded-lg border border-blue-400/30 shadow solar-grid relative flex items-center justify-center text-[9px] font-bold font-mono tracking-wider text-blue-300`;
-            div.innerHTML = `<div class="absolute inset-0 bg-cyan-400/5 mix-blend-color-dodge rounded-lg"></div><span>${label}</span>`;
-            return div;
-        }
+    const div = document.createElement('div');
+    
+    // Adjusted class definitions (removed solar-grid, added overflow-hidden)
+    div.className = `${isMini ? 'w-28 h-8' : 'w-24 h-16'} rounded-lg border border-blue-500/50 shadow relative flex items-center justify-center text-[10px] font-bold font-mono tracking-wider text-blue-100 overflow-hidden`;
+    
+    // Inject the solar cell image as a CSS background
+    div.style.backgroundImage = "url('solar-cell-image.jpg')";
+    div.style.backgroundSize = "cover";
+    div.style.backgroundPosition = "center";
+    
+    // Added a slight dark backdrop overlay over the image so your text (e.g., 'S-1', 'P-1') remains legible
+    div.innerHTML = `
+        <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-[0.5px]"></div>
+        <span class="relative z-10 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/50 shadow-sm">${label}</span>
+    `;
+    return div;
+}
 
         // Display Toggling Subsystem for Chart Graphs
         function setGraphDisplayMode(mode) {
