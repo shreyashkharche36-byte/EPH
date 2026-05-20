@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Cell Characteristics Advanced Virtual Lab Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .solar-grid {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
+
+    <header class="border-b border-slate-800 bg-slate-950 p-4 sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 text-slate-950 p-2.5 rounded-xl shadow-lg shadow-amber-500/20 animate-pulse">
+                    <i class="fa-solid fa-solar-panel text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                        Solar Cell Characteristics Engine
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Engineering Physics Advanced Virtual Lab (A9 & B7 Integration)</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap bg-slate-900 p-1 rounded-xl border border-slate-800 matches-interface">
+                <button onclick="switchTab('workspace')" id="btn-workspace" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 shadow transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-network-wired mr-1.5"></i>Drag & Drop Workbench
+                </button>
+                <button onclick="switchTab('single')" id="btn-single" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-square mr-1.5"></i>Single Cell Fixed
+                </button>
+                <button onclick="switchTab('series')" id="btn-series" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-arrow-right-arrows-left mr-1.5"></i>Series Configuration
+                </button>
+                <button onclick="switchTab('parallel')" id="btn-parallel" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-grip mr-1.5"></i>Parallel Configuration
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-amber-500"></i> Environmental Controls
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-medium mb-1.5">
+                            <span class="text-slate-400">Solar Irradiance (G)</span>
+                            <span class="text-amber-400 font-bold font-mono" id="val-intensity">1000 W/m²</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-sun text-lg text-amber-500"></i>
+                            <input type="range" id="input-intensity" min="200" max="1200" step="50" value="1000" 
+                                   oninput="calculateCharacteristics()" class="w-full accent-amber-500 h-2 bg-slate-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs font-medium mb-1.5">
+                            <span class="text-slate-400">Cell Temperature (T)</span>
+                            <span class="text-orange-400 font-bold font-mono" id="val-temp">25 °C</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-temperature-half text-lg text-orange-500"></i>
+                            <input type="range" id="input-temp" min="0" max="75" step="5" value="25" 
+                                   oninput="calculateCharacteristics()" class="w-full accent-orange-500 h-2 bg-slate-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+                    
+                    <div id="deck-container" class="pt-3 border-t border-slate-800">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Component Source Deck</label>
+                        <div class="bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center gap-2">
+                            <div id="solar-panel-asset" draggable="true" ondragstart="drag(event)" 
+                                 class="w-full bg-gradient-to-br from-blue-900 to-indigo-950 p-2.5 rounded-xl border-2 border-blue-500 shadow-md cursor-grab active:cursor-grabbing hover:scale-[1.01] transition-all flex flex-col items-center group">
+                                <div class="w-full h-12 bg-blue-950 rounded border border-blue-400/20 solar-grid relative flex flex-wrap p-1 gap-1">
+                                    <div class="absolute inset-0 bg-cyan-400/5 mix-blend-color-dodge rounded"></div>
+                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
+                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
+                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
+                                    <div class="flex-1 min-w-[20%] border border-blue-400/10 rounded-sm"></div>
+                                </div>
+                                <span class="text-[10px] font-bold text-blue-300 mt-1.5 tracking-wide flex items-center gap-1">
+                                    <i class="fa-solid fa-hand-rock text-slate-400 group-hover:text-amber-400 text-[9px]"></i>
+                                    DRAG PHOTOVOLTAIC NODE
+                                </span>
+                                <span class="text-[9px] text-slate-500 font-mono">V_oc: 0.60V | I_sc: 3.0A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-charging-station text-emerald-500"></i> Rheostat / Load Sweep
+                </h2>
+                <p class="text-[11px] text-slate-400 mb-4">Adjust the circuit resistance load line to sample operating coordinates from Short-Circuit across to Open-Circuit conditions.</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-medium mb-1.5">
+                            <span class="text-slate-400">Load Resistance ($R_L$)</span>
+                            <span id="val-rh" class="text-emerald-400 font-bold font-mono">10.0 Ω</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-bezier-curve text-lg text-emerald-500"></i>
+                            <input type="range" id="input-rh" min="0.1" max="150" step="0.5" value="10" 
+                                   oninput="updateCurrentPoint()" class="w-full accent-emerald-500 h-2 bg-slate-800 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-center shadow-inner">
+                            <span class="text-[10px] uppercase text-slate-500 tracking-wider block font-medium">Digital Voltmeter</span>
+                            <span id="m-volt" class="text-lg font-mono text-cyan-400 font-bold block mt-0.5">0.000 V</span>
+                        </div>
+                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-center shadow-inner">
+                            <span class="text-[10px] uppercase text-slate-500 tracking-wider block font-medium">Digital Ammeter</span>
+                            <span id="m-amp" class="text-lg font-mono text-emerald-400 font-bold block mt-0.5">0.000 A</span>
+                        </div>
+                    </div>
+
+                    <button onclick="logCurrentDataPoint()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all flex justify-center items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-square-plus"></i> Record Coordinates to Ledger
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl flex-1">
+                <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-cyan-500"></i> Calculated Circuit Telemetry
+                </h2>
+                <div class="grid grid-cols-2 gap-3 font-mono">
+                    <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
+                        <span class="text-[10px] font-sans text-slate-400 block">Open Circuit Volts ($V_{oc}$)</span>
+                        <span class="text-base font-bold text-cyan-400 block mt-0.5" id="calc-voc">--</span>
+                    </div>
+                    <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
+                        <span class="text-[10px] font-sans text-slate-400 block">Short Circuit Amps ($I_{sc}$)</span>
+                        <span class="text-base font-bold text-amber-400 block mt-0.5" id="calc-isc">--</span>
+                    </div>
+                    <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
+                        <span class="text-[10px] font-sans text-slate-400 block">Max Output Power ($P_{max}$)</span>
+                        <span class="text-base font-bold text-emerald-400 block mt-0.5" id="calc-pmax">--</span>
+                    </div>
+                    <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/60">
+                        <span class="text-[10px] font-sans text-slate-400 block">Calculated Fill Factor ($FF$)</span>
+                        <span class="text-base font-bold text-indigo-400 block mt-0.5" id="calc-ff">--</span>
+                    </div>
+                </div>
+                
+                <div class="mt-3 bg-slate-900/60 border border-slate-850 p-2.5 rounded-xl text-[11px] text-slate-400 space-y-1">
+                    <div class="flex justify-between"><span class="font-medium">Voltage at Max Power ($V_{mp}$):</span><span id="m-vmp" class="font-mono text-slate-300">--</span></div>
+                    <div class="flex justify-between"><span class="font-medium">Current at Max Power ($I_{mp}$):</span><span id="m-imp" class="font-mono text-slate-300">--</span></div>
+                </div>
+
+                <button onclick="resetSimulation()" class="w-full mt-3 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 py-1.5 rounded-lg text-[10px] font-semibold border border-slate-800 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Flush System Arrays
+                </button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 flex flex-col gap-6">
+            
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+                    <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2" id="canvas-title">
+                        <i class="fa-solid fa-bezier-curve text-blue-500"></i> Interactive Circuit Layout Template
+                    </h2>
+                    <span id="canvas-badge" class="px-2 py-0.5 rounded-md text-[10px] font-mono tracking-wider uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        Active Sandbox
+                    </span>
+                </div>
+
+                <div id="view-workspace" class="space-y-4 tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div ondragover="allowDrop(event)" ondrop="drop(event, 'series')" 
+                             class="bg-slate-900/60 border-2 border-dashed border-slate-800 hover:border-amber-500/40 rounded-xl p-4 min-h-[150px] flex flex-col justify-between transition relative">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-bold tracking-wider text-amber-400 uppercase">Series Terminal Block Array (Voltage Stacking)</span>
+                                <span class="text-[10px] font-mono bg-slate-950 px-1.5 py-0.5 rounded text-slate-400 border border-slate-850" id="count-series">0 Modules</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2 py-3 overflow-x-auto w-full" id="container-series">
+                                <div class="text-center text-slate-500 text-xs py-4 italic pointer-events-none">Drop photovoltaic blocks to scale array Voltage</div>
+                            </div>
+                            <div class="text-[10px] text-slate-500 flex justify-between items-center">
+                                <span>Model: $V_{total} = \Sigma V_n \ | \ I_{total} = I_{cell}$</span>
+                                <button onclick="clearZone('series')" class="text-red-400 hover:text-red-300 font-medium underline text-[9px] cursor-pointer">Clear Slot</button>
+                            </div>
+                        </div>
+
+                        <div ondragover="allowDrop(event)" ondrop="drop(event, 'parallel')" 
+                             class="bg-slate-900/60 border-2 border-dashed border-slate-800 hover:border-cyan-500/40 rounded-xl p-4 min-h-[150px] flex flex-col justify-between transition relative">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-bold tracking-wider text-cyan-400 uppercase">Parallel Terminal Block Array (Current Stacking)</span>
+                                <span class="text-[10px] font-mono bg-slate-950 px-1.5 py-0.5 rounded text-slate-400 border border-slate-850" id="count-parallel">0 Modules</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center gap-1.5 py-2 overflow-y-auto max-h-[120px] w-full" id="container-parallel">
+                                <div class="text-center text-slate-500 text-xs py-4 italic pointer-events-none">Drop photovoltaic blocks to scale array Current</div>
+                            </div>
+                            <div class="text-[10px] text-slate-500 flex justify-between items-center">
+                                <span>Model: $V_{total} = V_{cell} \ | \ I_{total} = \Sigma I_n$</span>
+                                <button onclick="clearZone('parallel')" class="text-red-400 hover:text-red-300 font-medium underline text-[9px] cursor-pointer">Clear Slot</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-single" class="tab-content hidden">
+                    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center min-h-[150px]">
+                        <div class="w-36 bg-gradient-to-br from-blue-900 to-indigo-950 p-3 rounded-xl border-2 border-blue-500 shadow-md solar-grid relative mb-2">
+                            <div class="absolute inset-0 bg-cyan-400/5 mix-blend-color-dodge rounded"></div>
+                            <div class="h-10 border border-blue-400/10 rounded"></div>
+                        </div>
+                        <p class="text-xs text-slate-300 font-medium text-center">Standard Baseline Single Photovoltaic Junction</p>
+                        <p class="text-[10px] text-slate-500 text-center mt-0.5">Isolating hardware boundaries ($V_{oc}=0.6V, I_{sc}=3.0A$) under variable operational coefficients.</p>
+                    </div>
+                </div>
+
+                <div id="view-series" class="tab-content hidden">
+                    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 min-h-[150px] flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-bold text-slate-400">Variable Multiplier Array Scale (Series Node Count)</span>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="param-series-count" min="1" max="4" step="1" value="2" oninput="calculateCharacteristics()" class="accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                <span id="lbl-series-count" class="text-xs font-mono font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-amber-400">2 Cells</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center gap-2 py-3 bg-slate-950/40 rounded-xl border border-slate-900" id="fixed-series-visualizer"></div>
+                    </div>
+                </div>
+
+                <div id="view-parallel" class="tab-content hidden">
+                    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 min-h-[150px] flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-bold text-slate-400">Variable Multiplier Array Scale (Parallel Node Count)</span>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="param-parallel-count" min="1" max="4" step="1" value="2" oninput="calculateCharacteristics()" class="accent-cyan-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                <span id="lbl-parallel-count" class="text-xs font-mono font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-cyan-400">2 Cells</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center gap-1.5 py-2 bg-slate-950/40 rounded-xl border border-slate-900" id="fixed-parallel-visualizer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-amber-500"></i> Real-Time Characteristic Curve Graphs
+                        </h2>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Red & Blue markers track dynamic operations along the swept resistance load lines.</p>
+                    </div>
+                    <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[10px] font-medium self-end sm:self-auto">
+                        <button id="toggle-all" onclick="setGraphDisplayMode('all')" class="graph-toggle-btn px-2.5 py-1 rounded bg-slate-800 text-slate-200 cursor-pointer">Overlay Combined</button>
+                        <button id="toggle-iv" onclick="setGraphDisplayMode('iv')" class="graph-toggle-btn px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">I-V Curve Only</button>
+                        <button id="toggle-pv" onclick="setGraphDisplayMode('pv')" class="graph-toggle-btn px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">P-V Curve Only</button>
+                    </div>
+                </div>
+                
+                <div class="w-full relative h-[300px]">
+                    <canvas id="masterCharacteristicChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-table-list text-emerald-500"></i> Experimental Observation Records Ledger
+                        </h2>
+                    </div>
+                    <button onclick="clearLogTable()" class="text-[10px] font-semibold bg-red-950/40 hover:bg-red-900 border border-red-800 text-red-400 hover:text-red-200 py-1 px-2.5 rounded-md transition-all cursor-pointer">
+                        Wipe Records
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto max-h-[180px] rounded-xl border border-slate-850">
+                    <table class="w-full text-xs text-left text-slate-300">
+                        <thead class="text-[10px] uppercase bg-slate-900 text-slate-400 tracking-wider sticky top-0 border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-2">Index</th>
+                                <th class="px-4 py-2">Layout Config</th>
+                                <th class="px-4 py-2">Irradiance ($G$)</th>
+                                <th class="px-4 py-2">Temp ($T$)</th>
+                                <th class="px-4 py-2">Resist ($R_L$)</th>
+                                <th class="px-4 py-2">Voltage ($V$)</th>
+                                <th class="px-4 py-2">Current ($I$)</th>
+                                <th class="px-4 py-2">Power ($P$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-850 bg-slate-950/40">
+                            <tr id="empty-row">
+                                <td colspan="8" class="text-center py-6 text-slate-500 italic">
+                                    No data entries recorded. Sweep the load line resistor and click 'Record Coordinates'.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="mt-12 bg-slate-950 border-t border-slate-850 py-4 text-center text-[10px] text-slate-500 tracking-wide font-mono">
+        <p>Photovoltaic System Advanced Simulation Engine Architecture • Integrated Laboratory Interface Platform</p>
+    </footer>
+
+    <script>
+        // Core System State Configuration Architecture
+        let currentTab = 'workspace'; 
+        let graphDisplayMode = 'all'; // Options: 'all', 'iv', 'pv'
+        let loggedPointsCount = 0;
+        
+        // Workbench Node Counters
+        let seriesCount = 0;
+        let parallelCount = 0;
+        
+        // Internal Physics Engine Storage Arrays
+        let currentArrayV = [];
+        let currentArrayI = [];
+        let currentArrayP = [];
+        
+        let activeChartInstance = null;
+        
+        // Dynamic Circuit Threshold Values
+        let currentVoc = 0;
+        let currentIsc = 0;
+        let currentPmax = 0;
+        let currentVmp = 0;
+        let currentImp = 0;
+
+        // Base Calibration Threshold Parameters (Ideal Silicon Junction Model)
+        const BASE_CELL_VOC = 0.60;   
+        const BASE_CELL_ISC = 3.00;   
+        const VOC_TEMP_COEFF = -0.0022; // -2.2mV per degree Celsius variance
+
+        // System Orchestrator Initialization Hook
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateCharacteristics();
+        });
+
+        // Interface Tab Switching Router
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-slate-950', 'shadow');
+                btn.classList.add('text-slate-400', 'hover:text-slate-200');
+            });
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
+            activeBtn.classList.add('bg-amber-500', 'text-slate-950', 'shadow');
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+            const badge = document.getElementById('canvas-badge');
+            const title = document.getElementById('canvas-title');
+            const deck = document.getElementById('deck-container');
+
+            if (tabId === 'workspace') {
+                title.innerHTML = `<i class="fa-solid fa-network-wired text-blue-500"></i> Interactive Circuit Layout`;
+                badge.innerText = 'Active Workbench';
+                deck.classList.remove('hidden');
+            } else {
+                deck.classList.add('hidden');
+                if (tabId === 'single') {
+                    title.innerHTML = `<i class="fa-solid fa-square text-cyan-500"></i> Single Cell Analysis Workspace`;
+                    badge.innerText = 'Fixed Module Component';
+                } else if (tabId === 'series') {
+                    title.innerHTML = `<i class="fa-solid fa-arrow-right-arrows-left text-amber-500"></i> Series Circuit Board Setup`;
+                    badge.innerText = 'Analytical Comparative Engine';
+                } else if (tabId === 'parallel') {
+                    title.innerHTML = `<i class="fa-solid fa-grip text-cyan-500"></i> Parallel Circuit Board Setup`;
+                    badge.innerText = 'Analytical Comparative Engine';
+                }
+            }
+
+            calculateCharacteristics();
+        }
+
+        // Native HTML5 Drag and Drop Subsystem
+        function drag(ev) {
+            ev.dataTransfer.setData("text/plain", ev.target.id);
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drop(ev, zone) {
+            ev.preventDefault();
+            if (zone === 'series') {
+                if (seriesCount >= 4) return alert("Maximum 4 modules supported in series simulation zone.");
+                seriesCount++;
+                parallelCount = 0; 
+                clearZoneDOM('parallel');
+            } else {
+                if (parallelCount >= 4) return alert("Maximum 4 modules supported in parallel simulation zone.");
+                parallelCount++;
+                seriesCount = 0; 
+                clearZoneDOM('series');
+            }
+            updateWorkspaceDOM();
+            calculateCharacteristics();
+        }
+
+        function clearZone(zone) {
+            if (zone === 'series') seriesCount = 0;
+            else parallelCount = 0;
+            clearZoneDOM(zone);
+            calculateCharacteristics();
+        }
+
+        function clearZoneDOM(zone) {
+            const container = document.getElementById(`container-${zone}`);
+            document.getElementById(`count-${zone}`).innerText = `0 Modules`;
+            container.innerHTML = `<div class="text-center text-slate-500 text-xs py-4 italic pointer-events-none">Drop photovoltaic blocks to scale array ${zone === 'series' ? 'Voltage' : 'Current'}</div>`;
+        }
+
+        function updateWorkspaceDOM() {
+            if (seriesCount > 0) {
+                const container = document.getElementById('container-series');
+                document.getElementById('count-series').innerText = `${seriesCount} Module${seriesCount > 1 ? 's' : ''}`;
+                container.innerHTML = '';
+                for (let i = 0; i < seriesCount; i++) {
+                    container.appendChild(createPanelDOMNode(`S-Node-${i+1}`));
+                    if (i < seriesCount - 1) {
+                        container.innerHTML += `<div class="h-0.5 w-3 bg-amber-500 relative flex items-center justify-center"><i class="fa-solid fa-chevron-right text-[7px] text-amber-400 absolute"></i></div>`;
+                    }
+                }
+            }
+            if (parallelCount > 0) {
+                const container = document.getElementById('container-parallel');
+                document.getElementById('count-parallel').innerText = `${parallelCount} Module${parallelCount > 1 ? 's' : ''}`;
+                container.innerHTML = '';
+                for (let i = 0; i < parallelCount; i++) {
+                    container.appendChild(createPanelDOMNode(`P-Node-${i+1}`, true));
+                }
+            }
+        }
+
+        function createPanelDOMNode(label, isMini = false) {
+            const div = document.createElement('div');
+            div.className = `${isMini ? 'w-24 h-7' : 'w-20 h-12'} bg-gradient-to-br from-blue-950 to-indigo-950 rounded-lg border border-blue-400/30 shadow solar-grid relative flex items-center justify-center text-[9px] font-bold font-mono tracking-wider text-blue-300`;
+            div.innerHTML = `<div class="absolute inset-0 bg-cyan-400/5 mix-blend-color-dodge rounded-lg"></div><span>${label}</span>`;
+            return div;
+        }
+
+        // Display Toggling Subsystem for Chart Graphs
+        function setGraphDisplayMode(mode) {
+            graphDisplayMode = mode;
+            document.querySelectorAll('.graph-toggle-btn').forEach(btn => {
+                btn.className = 'graph-toggle-btn px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer';
+            });
+            document.getElementById(`toggle-${mode}`).className = 'graph-toggle-btn px-2.5 py-1 rounded bg-slate-800 text-slate-200 cursor-pointer';
+            calculateCharacteristics();
+        }
+
+        // Math Core Engine Layout (Shockley Diode Formulations Physics Mapping Engine)
+        function calculateCharacteristics() {
+            const intensity = parseFloat(document.getElementById('input-intensity').value);
+            const temp = parseFloat(document.getElementById('input-temp').value);
+
+            document.getElementById('val-intensity').innerText = `${intensity} W/m²`;
+            document.getElementById('val-temp').innerText = `${temp} °C`;
+
+            // Structural Multiplier Sizing Factors Determination Loop
+            let sCells = 1;
+            let pCells = 1;
+
+            if (currentTab === 'workspace') {
+                if (seriesCount > 0) sCells = seriesCount;
+                if (parallelCount > 0) pCells = parallelCount;
+            } else if (currentTab === 'single') {
+                sCells = 1; pCells = 1;
+            } else if (currentTab === 'series') {
+                sCells = parseInt(document.getElementById('param-series-count').value);
+                document.getElementById('lbl-series-count').innerText = `${sCells} Cell${sCells > 1 ? 's' : ''}`;
+                const vis = document.getElementById('fixed-series-visualizer');
+                vis.innerHTML = '';
+                for (let i = 0; i < sCells; i++) {
+                    vis.appendChild(createPanelDOMNode(`Series-${i+1}`));
+                    if (i < sCells - 1) vis.innerHTML += `<div class="h-0.5 w-3 bg-amber-500"></div>`;
+                }
+            } else if (currentTab === 'parallel') {
+                pCells = parseInt(document.getElementById('param-parallel-count').value);
+                document.getElementById('lbl-parallel-count').innerText = `${pCells} Cell${pCells > 1 ? 's' : ''}`;
+                const vis = document.getElementById('fixed-parallel-visualizer');
+                vis.innerHTML = '';
+                for (let i = 0; i < pCells; i++) {
+                    vis.appendChild(createPanelDOMNode(`Parallel-${i+1}`, true));
+                }
+            }
+
+            // Math Core Parameter Tuning Functions
+            const dT = temp - 25;
+            const intensityRatio = intensity / 1000.0;
+            
+            // Short Circuit parameter variance maps linearly to light scaling factor changes
+            currentIsc = BASE_CELL_ISC * intensityRatio * pCells;
+            
+            // Open circuit parameter drops along standard temperature and logarithmic illumination equations
+            let individualVoc = BASE_CELL_VOC + (dT * VOC_TEMP_COEFF) + 0.04 * Math.log(intensityRatio + 0.01);
+            if (individualVoc < 0.1) individualVoc = 0.1; 
+            currentVoc = individualVoc * sCells;
+
+            currentArrayV = [];
+            currentArrayI = [];
+            currentArrayP = [];
+            currentPmax = 0;
+
+            const steps = 60;
+            const thermalVoltage = 0.0259 * ((temp + 273.15) / 298.15) * sCells; 
+            const idealityFactor = 1.3;
+            const thermalFactor = idealityFactor * thermalVoltage;
+
+            for (let i = 0; i <= steps; i++) {
+                let v = (currentVoc / steps) * i;
+                if (v >= currentVoc) v = currentVoc;
+
+                // Transformed Shockley Equation Mapping Approximation Model
+                let current = currentIsc * (1 - Math.exp((v - currentVoc) / thermalFactor)) / (1 - Math.exp(-currentVoc / thermalFactor));
+                if (current < 0) current = 0;
+                
+                let power = v * current;
+
+                currentArrayV.push(v);
+                currentArrayI.push(current);
+                currentArrayP.push(power);
+
+                if (power > currentPmax) {
+                    currentPmax = power;
+                    currentVmp = v;
+                    currentImp = current;
+                }
+            }
+
+            // Injected Telemetry Component Updates
+            document.getElementById('calc-voc').innerText = `${currentVoc.toFixed(3)} V`;
+            document.getElementById('calc-isc').innerText = `${currentIsc.toFixed(3)} A`;
+            document.getElementById('calc-pmax').innerText = `${currentPmax.toFixed(3)} W`;
+            
+            let fillFactor = currentPmax / (currentVoc * currentIsc);
+            document.getElementById('calc-ff').innerText = isNaN(fillFactor) ? "0.000" : fillFactor.toFixed(3);
+            document.getElementById('m-vmp').innerText = `${currentVmp.toFixed(3)} V`;
+            document.getElementById('m-imp').innerText = `${currentImp.toFixed(3)} A`;
+
+            renderChart();
+            updateCurrentPoint();
+        }
+
+        // Resolves Current Load Line Intersections using Mathematical Error Minimization Engine
+        function updateCurrentPoint() {
+            const rl = parseFloat(document.getElementById('input-rh').value);
+            document.getElementById('val-rh').innerText = `${rl.toFixed(1)} Ω`;
+
+            let matchedV = 0;
+            let matchedI = 0;
+            let minimumErrorDelta = 99999;
+
+            // Traverses internal matrix locating point minimizing delta variance residual absolute: |V_curve - I_curve * R_load|
+            for (let k = 0; k < currentArrayV.length; k++) {
+                let vCurve = currentArrayV[k];
+                let iCurve = currentArrayI[k];
+                let projectedV = iCurve * rl;
+                let delta = Math.abs(vCurve - projectedV);
+
+                if (delta < minimumErrorDelta) {
+                    minimumErrorDelta = delta;
+                    matchedV = vCurve;
+                    matchedI = iCurve;
+                }
+            }
+
+            document.getElementById('m-volt').innerText = `${matchedV.toFixed(3)} V`;
+            document.getElementById('m-amp').innerText = `${matchedI.toFixed(3)} A`;
+
+            // Refreshes Tracker Nodes coordinates inside Chart context structure
+            if (activeChartInstance) {
+                const showIVMarker = (graphDisplayMode === 'all' || graphDisplayMode === 'iv');
+                const showPVMarker = (graphDisplayMode === 'all' || graphDisplayMode === 'pv');
+                
+                activeChartInstance.data.datasets[2].data = showIVMarker ? [{x: matchedV, y: matchedI}] : [];
+                activeChartInstance.data.datasets[3].data = showPVMarker ? [{x: matchedV, y: (matchedV * matchedI)}] : [];
+                activeChartInstance.update('none'); 
+            }
+        }
+
+        // Chart.js Graphics Assembly Framework Rendering Loop
+        function renderChart() {
+            const ctx = document.getElementById('masterCharacteristicChart').getContext('2d');
+
+            const ivPoints = currentArrayV.map((v, i) => ({x: v, y: currentArrayI[i]}));
+            const pvPoints = currentArrayV.map((v, i) => ({x: v, y: currentArrayP[i]}));
+
+            const showIV = (graphDisplayMode === 'all' || graphDisplayMode === 'iv');
+            const showPV = (graphDisplayMode === 'all' || graphDisplayMode === 'pv');
+
+            if (activeChartInstance) {
+                activeChartInstance.data.datasets[0].data = showIV ? ivPoints : [];
+                activeChartInstance.data.datasets[1].data = showPV ? pvPoints : [];
+                
+                // Readjust Scale parameters dynamically
+                activeChartInstance.options.scales.x.max = parseFloat((currentVoc * 1.05).toFixed(2));
+                activeChartInstance.options.scales.yI.max = parseFloat((currentIsc * 1.05).toFixed(2));
+                activeChartInstance.options.scales.yP.max = parseFloat((currentPmax * 1.1).toFixed(2));
+                
+                activeChartInstance.update();
+                return;
+            }
+
+            activeChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'I-V Curve Characteristics (Left Y-Axis)',
+                            data: showIV ? ivPoints : [],
+                            showLine: true,
+                            borderColor: '#f59e0b', // Amber
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            yAxisID: 'yI',
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'P-V Curve Characteristics (Right Y-Axis)',
+                            data: showPV ? pvPoints : [],
+                            showLine: true,
+                            borderColor: '#10b981', // Emerald
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            yAxisID: 'yP',
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Operating Point Tracker (I-V)',
+                            data: [],
+                            backgroundColor: '#ef4444', // Red Marker
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            yAxisID: 'yI'
+                        },
+                        {
+                            label: 'Operating Point Tracker (P-V)',
+                            data: [],
+                            backgroundColor: '#3b82f6', // Blue Marker
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            yAxisID: 'yP'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Voltage (Volts, V)', color: '#94a3b8', font: { weight: 'bold' } },
+                            grid: { color: '#1e293b' },
+                            ticks: { color: '#64748b' },
+                            min: 0,
+                            max: currentVoc * 1.05
+                        },
+                        yI: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Current (Amperes, A)', color: '#f59e0b', font: { weight: 'bold' } },
+                            grid: { color: '#1e293b' },
+                            ticks: { color: '#64748b' },
+                            min: 0,
+                            max: currentIsc * 1.05
+                        },
+                        yP: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Power (Watts, W)', color: '#10b981', font: { weight: 'bold' } },
+                            grid: { display: false },
+                            ticks: { color: '#64748b' },
+                            min: 0,
+                            max: currentPmax * 1.1
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#f1f5f9', font: { size: 10 } }, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+        }
+
+        // Data Snapshot Entry Logging System 
+        function logCurrentDataPoint() {
+            const emptyRow = document.getElementById('empty-row');
+            if (emptyRow) emptyRow.remove();
+
+            loggedPointsCount++;
+            const intensity = document.getElementById('input-intensity').value;
+            const temp = document.getElementById('input-temp').value;
+            const rl = parseFloat(document.getElementById('input-rh').value).toFixed(1);
+            const volt = document.getElementById('m-volt').innerText;
+            const amp = document.getElementById('m-amp').innerText;
+            
+            const numericalV = parseFloat(volt);
+            const numericalA = parseFloat(amp);
+            const power = (numericalV * numericalA).toFixed(3);
+
+            let displayConfigStr = "";
+            if (currentTab === 'workspace') {
+                displayConfigStr = seriesCount > 0 ? `Wb (Series: ${seriesCount})` : (parallelCount > 0 ? `Wb (Parallel: ${parallelCount})` : 'Wb (Single)');
+            } else if (currentTab === 'single') {
+                displayConfigStr = "Single Fixed";
+            } else if (currentTab === 'series') {
+                displayConfigStr = `Series Scale (${sCells = document.getElementById('param-series-count').value})`;
+            } else if (currentTab === 'parallel') {
+                displayConfigStr = `Parallel Scale (${pCells = document.getElementById('param-parallel-count').value})`;
+            }
+
+            const tbody = document.getElementById('table-body');
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-900 transition-colors border-b border-slate-850 text-slate-300";
+            row.innerHTML = `
+                <td class="px-4 py-2 font-mono text-slate-500">${loggedPointsCount}</td>
+                <td class="px-4 py-2 font-semibold text-amber-500 text-[11px]">${displayConfigStr}</td>
+                <td class="px-4 py-2 font-mono">${intensity}</td>
+                <td class="px-4 py-2 font-mono">${temp} °C</td>
+                <td class="px-4 py-2 font-mono text-slate-400">${rl} Ω</td>
+                <td class="px-4 py-2 font-mono text-cyan-400 font-medium">${volt}</td>
+                <td class="px-4 py-2 font-mono text-emerald-400 font-medium">${amp}</td>
+                <td class="px-4 py-2 font-mono text-slate-100 font-semibold">${power} W</td>
+            `;
+            tbody.insertBefore(row, tbody.firstChild);
+        }
+
+        // Observation Ledger Cleandown Routine
+        function clearLogTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = `<tr id="empty-row"><td colspan="8" class="text-center py-6 text-slate-500 italic">No data entries recorded. Sweep the load line resistor and click 'Record Coordinates'.</td></tr>`;
+            loggedPointsCount = 0;
+        }
+
+        // Global Variable Reset Handler
+        function resetSimulation() {
+            seriesCount = 0;
+            parallelCount = 0;
+            document.getElementById('input-intensity').value = 1000;
+            document.getElementById('input-temp').value = 25;
+            document.getElementById('input-rh').value = 10;
+            
+            clearZoneDOM('series');
+            clearZoneDOM('parallel');
+            clearLogTable();
+            calculateCharacteristics();
+        }
+    </script>
+</body>
+</html>
